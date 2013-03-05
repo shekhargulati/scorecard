@@ -151,7 +151,9 @@
             <th>Goal Date</th>
             <th>Type</th>
             <th>Description</th>
-            <th>Action</th>
+			{{#showDeleteButton}}
+            	<th>Action</th>
+			{{/showDeleteButton}}
           </tr>
         </thead>
         
@@ -165,7 +167,9 @@
         <td> {{goalDate}} </td>
         <td> {{type}} </td>
         <td> {{description}} </td>
-        <td> <button type="submit" class="btn btn-danger">Delete</button> </td>
+		{{#showDeleteButton}}
+        	<td> <button type="submit" class="btn btn-danger">Delete</button> </td>
+		{{/showDeleteButton}}
       
     </script>
     

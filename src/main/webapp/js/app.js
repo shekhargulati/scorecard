@@ -42,7 +42,7 @@
 		},
 
 		renderGoals : function(goals){
-			var tableView = new Scorecard.TableView({collection: goals});
+			var tableView = new Scorecard.TableView({collection: goals, deleteButton : true});
 			this.$el.append(tableView.render().el);
 		}
 
@@ -51,20 +51,33 @@
 
 	Scorecard.TableView = Backbone.View.extend({
 		template : template('table'),
+		initialize : function(options){
+			this.deleteButton = options.deleteButton;
+		},
+	
 		render : function(){
 			this.$el.html(this.template(this));
 			this.collection.each(this.renderRow,this);
 			return this;
 		},
 		renderRow : function(row){
-			var row = new Scorecard.TableView.Row({model : row});
+			var row = new Scorecard.TableView.Row({model : row , deleteButton : this.deleteButton});
 			this.$('#scoresTable').append(row.render().el);
+		},
+		showDeleteButton : function(){
+			return this.deleteButton;
 		}
+		
+		
 	});
 
 	Scorecard.TableView.Row = Backbone.View.extend({
 		template : template('row'),
 		tagName : 'tr',
+		initialize : function(options){
+			this.deleteButton = options.deleteButton;
+		},
+	
 		events : {
 			'click button' : 'deleteGoal'
 		},
@@ -72,7 +85,10 @@
 			this.$el.html(this.template(this));
 			return this;
 		},
-
+		showDeleteButton : function(){
+			return this.deleteButton;
+		},
+		
 		deleteGoal : function(){
 			this.model.destroy();
 			return false;
@@ -177,15 +193,36 @@
 		}
 	});
 
-	Scorecard.ShowDetailsView = Backbone.View.extend({
+	Scorecard.ScorecardDetails = Backbone.Collection.extend({
+		initialize : function(options){
+			this.evangelist = options.evangelist;
+			this.month = options.month;
+		},
 		
+		url : function(){
+			return 'api/scorecard/'+this.evangelist+'/'+this.month;
+		}
+		
+	
+	});
+	Scorecard.ShowDetailsView = Backbone.View.extend({
+		initialize : function(evangelist, month){
+			this.evangelist = evangelist;
+			this.month = month;
+			this.scorecardDetails = new Scorecard.ScorecardDetails({evangelist: evangelist,month : month});
+			this.scorecardDetails.on('all',this.render,this);
+			this.scorecardDetails.fetch();
+		},
+	
 		render : function(){
-			this.$el.text('In Show Details View..');
-			
+			console.log('in render() .. ShowDetailsView');
+			var tableView = new Scorecard.TableView({collection: this.scorecardDetails,deleteButton : false});
+			this.$el.html(tableView.render().el);
 			return this;
 		}
 	
 	});
+	
 	Scorecard.Router = Backbone.Router.extend({
 		initialize : function(options){
 			this.el = options.el;
@@ -209,9 +246,8 @@
 			this.el.append(scoreCardView.render().el);
 		},
 		
-		showDetails : function(){
-			console.log('in routers showDetails()...');
-			var showDetailsView = new Scorecard.ShowDetailsView();
+		showDetails : function(evangelist,month){
+			var showDetailsView = new Scorecard.ShowDetailsView(evangelist,month);
 			this.el.empty();
 			this.el.append(showDetailsView.render().el);
 		}
