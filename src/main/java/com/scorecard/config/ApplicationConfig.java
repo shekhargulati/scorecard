@@ -8,10 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 import com.scorecard.controllers.GoalController;
-import com.scorecard.service.ScorecardService;
+import com.scorecard.service.ScoreboardService;
 
 @Configuration
-@ComponentScan(basePackageClasses = {GoalController.class,ScorecardService.class})
+@ComponentScan(basePackageClasses = {GoalController.class,ScoreboardService.class})
 @EnableWebMvc
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
 

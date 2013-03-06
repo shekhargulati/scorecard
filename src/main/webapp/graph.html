@@ -1,0 +1,44 @@
+<html>
+<head>
+    <title>jChartFX using JQueryUI</title>
+    
+    <style type="text/css">
+        #targetchart { width: 608px; height: 408px; padding: 4px; border: 1px solid #dddddd; background: #eeeeee }
+        #targetchart h3 { text-align: center; margin: 0; }
+ </style>
+     <link type="text/css" href="http://www.jchartfx.com/resources/Include/cupertino/jquery-ui-1.8.21.custom.css"
+        rel="Stylesheet" />
+    <script type="text/javascript" src="http://www.jchartfx.com/scripts/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="http://www.jchartfx.com/scripts/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="http://www.jchartfx.com/jChartFX/7.0.4728.16930/jchartfx.full.js"></script>
+</head>
+<body>
+     <div class="ChartDiv1" id="targetchart" style="display:inline-block">
+        <div id="myDiv" style="width:100%;height:100%;display:inline-block">
+     </div>
+     </div>
+     
+     <script language="javascript" type="text/javascript">
+         var chart1;
+         $(document).ready(function ($) {
+        	 var items = [
+        		            { "Month": "Jan", "Shekhar": 18},
+        		            { "Month": "Feb", "Shekhar": 10},
+        		            { "Month": "Mar", "Shekhar": 5},
+        		            { "Month": "Apr", "Shekhar": 10},
+        		            { "Month": "May", "Shekhar": 16},
+        		            { "Month": "Jun", "Shekhar": 20 }
+        		            ];
+             $("div", ".ChartDiv1").chart({
+                 gallery: cfx.Gallery.Bar,
+                 dataValues: items,
+                 titles: [{ text: "Monthly Scores for Shekhar"}],
+                 axisY:{
+                    min:0,
+                    max:30
+                }
+             });
+         });
+     </script>
+</body>
+</html>

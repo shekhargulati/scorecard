@@ -1,6 +1,8 @@
 package com.scorecard.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,11 @@ import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.scorecard.domain.Goal;
+import com.scorecard.domain.Month;
 import com.scorecard.domain.Scorecard;
 
 @Service
-public class ScorecardService {
+public class ScoreboardService {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -40,7 +43,13 @@ public class ScorecardService {
 					(String) _id.get("month"), (Integer) totalScore));
 
 		}
+		Collections.sort(scorecards, new Comparator<Scorecard>() {
 
+			@Override
+			public int compare(Scorecard first, Scorecard second) {
+				return Month.intValue(second.getMonth()) - Month.intValue(first.getMonth())  ;
+			}
+		});
 		return scorecards;
 
 	}
@@ -49,6 +58,11 @@ public class ScorecardService {
 			String evangelist, String month) {
 		Query query = Query.query(Criteria.where("month").is(month)
 				.and("evangelist").is(evangelist));
+		return mongoTemplate.find(query, Goal.class);
+	}
+
+	public List<Goal> fetchAllGoalsAcheivedByEvangelist(String evangelist) {
+		Query query = Query.query(Criteria.where("evangelist").is(evangelist));
 		return mongoTemplate.find(query, Goal.class);
 	}
 

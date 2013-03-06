@@ -15,7 +15,7 @@ public class ScorecardServiceTest {
 	@Test
 	public void find() throws Exception{
 		MongoTemplate mongoTemplate = mongoTemplate();
-		ScorecardService scorecardService = new ScorecardService();
+		ScoreboardService scorecardService = new ScoreboardService();
 		scorecardService.mongoTemplate = mongoTemplate;
 		List<Scorecard> scorecards = scorecardService.findTotalScorePerEvangelist();
 		Assert.assertEquals(2, scorecards.size());

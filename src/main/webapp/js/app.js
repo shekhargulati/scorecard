@@ -108,7 +108,11 @@
 		},
 		description : function(){
 			return this.model.get('description');
+		},
+		score : function(){
+			return this.model.get('score');
 		}
+		
 	});
 
 	
@@ -142,7 +146,7 @@
 	});
 
 	Scorecard.ScorecardCollection = Backbone.Collection.extend({
-		url : 'api/scorecard'
+		url : 'api/scoreboard'
 	});
 	
 	Scorecard.ScorecardView = Backbone.View.extend({
@@ -155,16 +159,65 @@
 		
 		render : function(){
 			this.$el.html(this.template(this));
+			var that = this;
+			google.load('visualization', '1',  {'callback':function(){
+				that.drawVisualization(that.scorecard,that);
+			},'packages':['corechart']});
+			
+			
 			this.scorecard.each(this.renderRow,this);
 			return this;
 		},
+		drawVisualization : function(scores,that) {
+			
+			var myMap = {}; 
+			console.log('Scores length '+scores.length);
+			var header = ['Month'];
+			scores.each(function(score){
+				var month = score.get('month');
+				var totalScore = score.get('totalScore');
+				var evangelist = score.get('evangelist');
+				if(header.indexOf(evangelist) === -1){
+					header.push(evangelist);
+				}
+				
+				
+				if(month in myMap){
+					var scorePerMonthArray = myMap[month];
+					scorePerMonthArray.push(totalScore);
+					myMap[month] = scorePerMonthArray;
+				}else{
+					var scoresPerMonthArray = new Array();
+					scoresPerMonthArray.push(totalScore);
+					myMap[month] = scoresPerMonthArray;
+				}
+			});
+			
+			var arrayOfData = [header];
+			for(var month in myMap){
+				var scoresForMonth = myMap[month];
+				//var newArr = [month,scoresForMonth[0],scoresForMonth[1]];
+				var newArr = [month];
+				for(monthScore in scoresForMonth){
+					newArr.push(scoresForMonth[monthScore]);
+				}
+				arrayOfData.push(newArr);
+			}
+			var data = google.visualization.arrayToDataTable(arrayOfData);
+	        var options = {
+	          title: 'Evangelist Scores',
+	          vAxis: {title: 'Scores',  titleTextStyle: {color: 'red'}}
+	        };
+
+	        var chart = new google.visualization.ColumnChart(that.$('#gviz').get(0));
+	        console.log('Chart '+chart);
+	        chart.draw(data, options);
+	    },
 		renderRow : function(model){
 			var row = new Scorecard.ScorecardView.Row({model : model});
 			this.$('#scorecardTable').append(row.render().el);
 		}
 		
-
-
 	});
 	
 	Scorecard.ScorecardView.Row = Backbone.View.extend({
@@ -200,7 +253,12 @@
 		},
 		
 		url : function(){
-			return 'api/scorecard/'+this.evangelist+'/'+this.month;
+			if(!this.month){
+				return 'api/scoreboard/'+this.evangelist;
+			}
+			return 'api/scoreboard/'+this.evangelist+'/'+this.month;
+			
+			
 		}
 		
 	
@@ -214,12 +272,37 @@
 			this.scorecardDetails.fetch();
 		},
 	
-		render : function(){
-			console.log('in render() .. ShowDetailsView');
+		render : function() {
 			var tableView = new Scorecard.TableView({collection: this.scorecardDetails,deleteButton : false});
 			this.$el.html(tableView.render().el);
+			var arrayOfData = this.getData(this.scorecardDetails);
+			
 			return this;
+		},
+		
+		getData : function(goals){
+			var myMap = {}; 
+			console.log('Goals length '+goals.length);
+			goals.each(function(goal){
+				var month = goal.get('month');
+				var score = goal.get('score');
+				if(month in myMap){
+					score += myMap[month];
+					myMap[month] = score;
+				}else{
+					myMap[month] = score;
+				}
+			});
+			console.log(myMap);
+			var arrayOfData = new Array();
+			for(var item in myMap){
+				arrayOfData.push([myMap[item],item]);
+			}
+			return arrayOfData;
+			
 		}
+
+		
 	
 	});
 	
@@ -230,7 +313,8 @@
 		routes : {
 			"" : "home",
 			'scorecard' : "getScorecard",
-			'scorecard/:evangelist/:month' : 'showDetails'
+			'scorecard/:evangelist' : 'showAllGoalsAchievedByEvangelist',
+			'scorecard/:evangelist/:month' : 'showAllGoalsAcheivedByEvangelistDuringMonth'
 		},
 
 		home : function(){
@@ -240,22 +324,26 @@
 		},
 
 		getScorecard : function(){
-			console.log('in getScorecard() ...');
 			var scoreCardView = new Scorecard.ScorecardView();
 			this.el.empty();
 			this.el.append(scoreCardView.render().el);
 		},
 		
-		showDetails : function(evangelist,month){
+		showAllGoalsAcheivedByEvangelistDuringMonth : function(evangelist,month){
 			var showDetailsView = new Scorecard.ShowDetailsView(evangelist,month);
 			this.el.empty();
 			this.el.append(showDetailsView.render().el);
+		},
+		showAllGoalsAchievedByEvangelist : function(evangelist){
+			this.el.empty();
+			var showDetailsView = new Scorecard.ShowDetailsView(evangelist,null);
+			this.el.append(showDetailsView.render().el);
 		}
-
 
 	});
 
 	var router = new Scorecard.Router({el : $('#main')});
 	Backbone.history.start();
 
+		
 })(jQuery);

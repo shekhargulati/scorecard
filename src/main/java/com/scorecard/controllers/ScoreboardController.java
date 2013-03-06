@@ -12,22 +12,29 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.scorecard.domain.Goal;
 import com.scorecard.domain.Scorecard;
-import com.scorecard.service.ScorecardService;
+import com.scorecard.service.ScoreboardService;
 
 @Controller
-@RequestMapping("/scorecard")
-public class ScorecardController {
+@RequestMapping("/scoreboard")
+public class ScoreboardController {
 
 	@Autowired
-	private ScorecardService scorecardService;
+	private ScoreboardService scoreboardService;
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody List<Scorecard> findScorecardPerEvangelistPerMonth() {
-		return scorecardService.findTotalScorePerEvangelist();
+		return scoreboardService.findTotalScorePerEvangelist();
 	}
 	
 	@RequestMapping(value="/{evangelist}/{month}",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody List<Goal> fetchGoalsAcheivedByEvangelistDuringTheMonth(@PathVariable("evangelist") String evangelist, @PathVariable("month") String month){
-		return scorecardService.fetchGoalsAcheivedByEvangelistDuringTheMonth(evangelist,month);
+		return scoreboardService.fetchGoalsAcheivedByEvangelistDuringTheMonth(evangelist,month);
 	}
+	
+	
+	@RequestMapping(value="/{evangelist}",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody List<Goal> fetchAllGoalsAcheivedByEvangelist(@PathVariable("evangelist") String evangelist){
+		return scoreboardService.fetchAllGoalsAcheivedByEvangelist(evangelist);
+	}
+	
 }
