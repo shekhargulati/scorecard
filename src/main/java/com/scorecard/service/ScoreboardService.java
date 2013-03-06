@@ -3,7 +3,9 @@ package com.scorecard.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -43,6 +45,7 @@ public class ScoreboardService {
 					(String) _id.get("month"), (Integer) totalScore));
 
 		}
+		
 		Collections.sort(scorecards, new Comparator<Scorecard>() {
 
 			@Override
@@ -53,6 +56,7 @@ public class ScoreboardService {
 		return scorecards;
 
 	}
+
 
 	public List<Goal> fetchGoalsAcheivedByEvangelistDuringTheMonth(
 			String evangelist, String month) {

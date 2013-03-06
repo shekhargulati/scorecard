@@ -203,6 +203,7 @@
 				}
 				arrayOfData.push(newArr);
 			}
+			console.log('data : '+arrayOfData);
 			var data = google.visualization.arrayToDataTable(arrayOfData);
 	        var options = {
 	          title: 'Evangelist Scores',
@@ -275,10 +276,43 @@
 		render : function() {
 			var tableView = new Scorecard.TableView({collection: this.scorecardDetails,deleteButton : false});
 			this.$el.html(tableView.render().el);
-			var arrayOfData = this.getData(this.scorecardDetails);
+			var that = this;
+			google.load('visualization', '1',  {'callback':function(){
+				that.drawVisualization(that.scorecardDetails,that);
+			},'packages':['corechart']});
 			
 			return this;
 		},
+		
+		drawVisualization : function(goals, that){
+			var header = ['Activity','Score'];
+			var arrayOfData = [header];
+			var myMap = {}; 
+			goals.each(function(goal){
+				var type = goal.get('type');
+				var score = goal.get('score');
+				if(type in myMap){
+					score += myMap[type];
+					myMap[type] = score;
+				}else{
+					myMap[type] = score;
+				}
+				
+			});
+			
+			for(var item in myMap){
+				arrayOfData.push([item,myMap[item]]);
+			}
+			var data = google.visualization.arrayToDataTable(arrayOfData);
+
+	        var options = {
+	          title: 'Activity Breakdown'
+	        };
+
+	        var chart = new google.visualization.PieChart(that.$('#divForGraph').get(0));
+	        chart.draw(data, options);
+		},
+		
 		
 		getData : function(goals){
 			var myMap = {}; 
